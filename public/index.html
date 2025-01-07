@@ -55,7 +55,8 @@
   </div>
 
   <script>
-  const { createApp, ref } = Vue;
+  
+const { createApp, ref } = Vue;
 createApp({
   setup() {
     const videoUrl = ref("");
@@ -71,13 +72,8 @@ createApp({
       isLoading.value = true; 
       videoInfo.value = null;
 
-      // Obfuscate the URL construction
-      const baseUrl = String.fromCharCode(47, 97, 112, 105, 47, 121, 111, 117, 116, 101, 63, 117, 114, 108, 61); // "/api/youtube?url="
-      const encodedUrl = encodeURIComponent(videoUrl.value);
-      const fullUrl = baseUrl + encodedUrl;
-
       try {
-        const response = await fetch(fullUrl);
+        const response = await fetch(`/api/youtube?url=${encodeURIComponent(videoUrl.value)}`);
         if (!response.ok) {
           throw new Error("Failed to fetch video info.");
         }
@@ -93,7 +89,6 @@ createApp({
     return { videoUrl, videoInfo, fetchVideoInfo, isLoading };
   }
 }).mount("#app");
-
 
   </script>
 </body>
