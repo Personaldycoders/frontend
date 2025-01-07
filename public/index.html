@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      
+      <!-- Video Info Display -->
       <div v-if="videoInfo" class="mt-6">
         <div class="p-4 border rounded-lg shadow-md">
           <h2 class="text-2xl font-bold mb-4">{{ videoInfo.title }}</h2>
@@ -55,41 +55,39 @@
   </div>
 
   <script>
-  
-const { createApp, ref } = Vue;
-createApp({
-  setup() {
-    const videoUrl = ref("");
-    const videoInfo = ref(null);
-    const isLoading = ref(false);
+    const { createApp, ref } = Vue;
+    createApp({
+      setup() {
+        const videoUrl = ref("");
+        const videoInfo = ref(null);
+        const isLoading = ref(false);
 
-    const fetchVideoInfo = async () => {
-      if (!videoUrl.value) {
-        alert("Please enter a valid YouTube URL.");
-        return;
+        const fetchVideoInfo = async () => {
+          if (!videoUrl.value) {
+            alert("Please enter a valid YouTube URL.");
+            return;
+          }
+
+          isLoading.value = true;
+          videoInfo.value = null;
+
+          try {
+            const response = await fetch(`/api/youtube?url=${encodeURIComponent(videoUrl.value)}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch video info.");
+            }
+            videoInfo.value = await response.json();
+          } catch (error) {
+            alert("Error fetching video info. Please try again.");
+            console.error(error);
+          } finally {
+            isLoading.value = false;
+          }
+        };
+
+        return { videoUrl, videoInfo, fetchVideoInfo, isLoading };
       }
-
-      isLoading.value = true; 
-      videoInfo.value = null;
-
-      try {
-        const response = await fetch(`/api/youtube?url=${encodeURIComponent(videoUrl.value)}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch video info.");
-        }
-        videoInfo.value = await response.json();
-      } catch (error) {
-        alert("Error fetching video info. Please try again.");
-        console.error(error);
-      } finally {
-        isLoading.value = false; 
-      }
-    };
-
-    return { videoUrl, videoInfo, fetchVideoInfo, isLoading };
-  }
-}).mount("#app");
-
+    }).mount("#app");
   </script>
 </body>
 </html>
