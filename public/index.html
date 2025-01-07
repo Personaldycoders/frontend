@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YTMP3 - Free YouTube to MP3 Converter</title>
+  <title>YTMP DOWNLOADER BY - DYCODERS.XYZ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://registry.npmmirror.com/vue/3.3.11/files/dist/vue.global.js"></script>
   <style>
@@ -14,56 +14,49 @@
 </head>
 <body class="bg-gray-100">
   <div id="app" class="min-h-screen flex flex-col items-center">
+    <!-- Header -->
     <header class="w-full bg-blue-700 text-white py-4">
       <div class="container mx-auto flex justify-between items-center px-4">
         <div class="flex items-center">
           <img class="h-8 mr-2" src="https://storage.googleapis.com/a1aa/image/YPZ3sKmJjez3ekCOe6g3h1MLyTHSSUBOGM3BfseDJhcZFmVgC.jpg" alt="YTMP3 Logo">
-          <span class="text-2xl font-bold">YT<span class="text-black">MP3</span></span>
+          <span class="text-2xl font-bold">YT<span class="text-black">&nbsp;DOWNLOAD</span></span>
         </div>
       </div>
     </header>
+
+    <!-- Main Content -->
     <main class="flex-grow w-full max-w-2xl bg-white shadow-md rounded-lg mt-8 p-6">
+      <!-- Input Section -->
       <div class="text-center mb-6">
         <input v-model="videoUrl" class="w-full p-3 border rounded-lg mb-4" placeholder="Enter YouTube URL" />
         <button @click="fetchVideoInfo" class="px-6 py-2 bg-black text-white rounded-lg">Convert</button>
       </div>
+
+      <!-- Loader -->
+      <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded shadow-lg text-center">
+          <h2 class="text-xl font-bold mb-4">Please wait...</h2>
+          <p class="text-gray-700">Fetching video information</p>
+        </div>
+      </div>
+
+      
       <div v-if="videoInfo" class="mt-6">
-        <h2 class="text-2xl font-bold mb-4">{{ videoInfo.title }}</h2>
-        <img :src="videoInfo.thumbnail" alt="Thumbnail" class="mb-4 rounded">
-        <div class="flex justify-center space-x-4">
-          <a :href="videoInfo.mp3" target="_blank" class="px-4 py-2 bg-blue-700 text-white rounded-full">Download MP3</a>
-          <a :href="videoInfo.mp4" target="_blank" class="px-4 py-2 bg-gray-700 text-white rounded-full">Download MP4</a>
+        <div class="p-4 border rounded-lg shadow-md">
+          <h2 class="text-2xl font-bold mb-4">{{ videoInfo.title }}</h2>
+          <img :src="videoInfo.thumbnail" alt="Thumbnail" class="mb-4 rounded">
+          <div class="flex justify-center space-x-4">
+            <a :href="videoInfo.mp3" target="_blank" class="block w-full px-4 py-2 bg-blue-700 text-white rounded-full text-center">Download MP3</a>
+            <a :href="videoInfo.mp4" target="_blank" class="block w-full px-4 py-2 bg-gray-700 text-white rounded-full text-center">Download MP4</a>
+          </div>
         </div>
       </div>
     </main>
   </div>
+
   <script>
-    const { createApp, ref } = Vue;
-    createApp({
-      setup() {
-        const videoUrl = ref("");
-        const videoInfo = ref(null);
+    var _0x4f5f=["\x6C\x6F\x61\x64"];const{createApp: _0x1f62,ref: _0x4d13}=Vue;_0x1f62({setup(){const _0x45e5x1=_0x4d13(""),_0x45e5x2=_0x4d13(null),_0x45e5x3=_0x4d13(false);const _0x45e5x4=async()=>{if(!_0x45e5x1.value){alert("\x50\x6C\x65\x61\x73\x65\x20\x65\x6E\x74\x65\x72\x20\x61\x20\x76\x61\x6C\x69\x64\x20\x59\x6F\x75\x54\x75\x62\x65\x20\x55\x52\x4C.");return;}_0x45e5x3.value=true;_0x45e5x2.value=null;try{const _0x45e5x5=await fetch(`/api/youtube?url=${encodeURIComponent(_0x45e5x1.value)}`);if(!_0x45e5x5.ok){throw new Error("\x46\x61\x69\x6C\x65\x64\x20\x74\x6F\x20\x66\x65\x74\x63\x68\x20\x76\x69\x64\x65\x6F\x20\x69\x6E\x66\x6F.");}_0x45e5x2.value=await _0x45e5x5.json();}catch(_0x45e5x6){alert("\x45\x72\x72\x6F\x72\x20\x66\x65\x74\x63\x68\x69\x6E\x67\x20\x76\x69\x64\x65\x6F\x20\x69\x6E\x66\x6F.\x20\x50\x6C\x65\x61\x73\x65\x20\x74\x72\x79\x20\x61\x67\x61\x69\x6E.");console[_0x4f5f[0]](_0x45e5x6);}finally{_0x45e5x3.value=false;};};return{videoUrl:_0x45e5x1,videoInfo:_0x45e5x2,fetchVideoInfo:_0x45e5x4,isLoading:_0x45e5x3};}}).mount("#app");
 
-        const fetchVideoInfo = async () => {
-          if (!videoUrl.value) {
-            alert("Please enter a valid YouTube URL.");
-            return;
-          }
-          try {
-            const response = await fetch(`/api/youtube?url=${encodeURIComponent(videoUrl.value)}`);
-            if (!response.ok) {
-              throw new Error("Failed to fetch video info.");
-            }
-            videoInfo.value = await response.json();
-          } catch (error) {
-            alert("Error fetching video info. Please try again.");
-            console.error(error);
-          }
-        };
-
-        return { videoUrl, videoInfo, fetchVideoInfo };
-      }
-    }).mount("#app");
   </script>
 </body>
 </html>
