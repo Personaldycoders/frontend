@@ -9,7 +9,8 @@
     "build": "echo 'No build step required'"
   },
   "dependencies": {
-    "axios": "^1.4.0"
+    "axios": "^1.4.0",
+    "next": "^13.0.0"   // Add Next.js here
   },
   "devDependencies": {},
   "keywords": ["ytmp3", "youtube", "converter", "vercel"],
