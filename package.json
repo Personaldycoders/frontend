@@ -2,7 +2,7 @@
   "name": "ytmp3-converter",
   "version": "1.0.0",
   "description": "Free YouTube to MP3/MP4 converter using Vercel",
-  "main": "api/youtube.js",
+  "main": "pages/api/youtube.js",
   "type": "module",
   "scripts": {
     "start": "vercel dev",
