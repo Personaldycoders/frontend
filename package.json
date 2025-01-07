@@ -1,25 +1,18 @@
 {
-  "name": "youtube-downloader",
+  "name": "ytmp3-converter",
   "version": "1.0.0",
-  "description": "A YouTube downloader API using btch-downloader",
+  "description": "Free YouTube to MP3/MP4 converter using Vercel",
   "main": "api/youtube.js",
+  "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "next build",
-    "start": "next start"
+    "start": "vercel dev",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
-    "btch-downloader": "^2.8.1",
-    "next": "^13.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "cheerio": "^1.0.0",
-    "got": "^11.8.2"
+    "axios": "^1.4.0"
   },
-  "devDependencies": {
-    "vercel": "^28.0.0"
-  },
-  "keywords": ["youtube", "downloader", "api", "vercel"],
-  "author": "Your Name",
+  "devDependencies": {},
+  "keywords": ["ytmp3", "youtube", "converter", "vercel"],
+  "author": "Dycoders",
   "license": "MIT"
 }
