@@ -1,95 +1,122 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YT DOWNLOADER BY - DYCODERS.XYZ</title>
+  <title>XYTDL</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue@3.3.11"></script>
+  <script src="https://registry.npmmirror.com/vue/3.3.11/files/dist/vue.global.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      font-family: 'Arial', sans-serif;
     }
   </style>
 </head>
-<body class="bg-gray-100">
-  <div id="app" class="min-h-screen flex flex-col items-center">
-    <!-- Header -->
-    <header class="w-full bg-blue-700 text-white py-4">
-      <div class="container mx-auto flex justify-between items-center px-4">
-        <div class="flex items-center">
-          <img class="h-8 mr-2" src="https://storage.googleapis.com/a1aa/image/YPZ3sKmJjez3ekCOe6g3h1MLyTHSSUBOGM3BfseDJhcZFmVgC.jpg" alt="YTMP3 Logo">
-          <span class="text-2xl font-bold">YT<span class="text-black">&nbsp;DOWNLOAD</span></span>
-        </div>
+<body>
+  <div id="app" class="min-h-screen flex flex-col items-center justify-center">
+    <header class="w-full flex justify-between items-center p-4 bg-black">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-download text-red-500"></i>
+        <span class="text-xl text-red-500 font-bold">XYTDL</span>
+      </div>
+      <div class="flex space-x-4">
+        <a href="#" class="text-red-500">API</a>
+        <a href="#" class="text-red-500">Contact</a>
       </div>
     </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow w-full max-w-2xl bg-white shadow-md rounded-lg mt-8 p-6">
-      <!-- Input Section -->
-      <div class="text-center mb-6">
-        <input v-model="videoUrl" class="w-full p-3 border rounded-lg mb-4" placeholder="Enter YouTube URL" />
-        <button @click="fetchVideoInfo" class="px-6 py-2 bg-black text-white rounded-lg">Convert</button>
+    <main class="flex flex-col items-center mt-10 px-4">
+      <div class="text-center">
+        <i class="fas fa-download text-4xl text-red-500"></i>
+        <h1 class="text-4xl text-red-500 font-bold mt-2">XYTDL</h1>
+        <p class="text-lg text-gray-400">Better YouTube Downloader</p>
+      </div>
+      <div class="mt-6 w-full max-w-md">
+        <input 
+          v-model="url" 
+          type="text" 
+          placeholder="Input query or paste your YouTube url..." 
+          class="w-full p-2 rounded border border-red-500 bg-black text-white placeholder-gray-500"
+        >
+        <button 
+          @click="fetchVideoInfo" 
+          :disabled="loading" 
+          class="w-full mt-2 p-2 bg-red-500 text-white rounded"
+        >
+          <span v-if="loading">Loading...</span>
+          <span v-else>Analyze</span>
+        </button>
+        <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
       </div>
 
-      <!-- Loader -->
-      <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded shadow-lg text-center">
-          <h2 class="text-xl font-bold mb-4">Please wait...</h2>
-          <p class="text-gray-700">Fetching video information</p>
-        </div>
-      </div>
-
-      <!-- Video Info Display -->
-      <div v-if="videoInfo" class="mt-6">
-        <div class="p-4 border rounded-lg shadow-md">
-          <h2 class="text-2xl font-bold mb-4">{{ videoInfo.title }}</h2>
-          <img :src="videoInfo.thumbnail" alt="Thumbnail" class="mb-4 rounded">
-          <div class="flex justify-center space-x-4">
-            <a :href="videoInfo.mp3" target="_blank" class="block w-full px-4 py-2 bg-blue-700 text-white rounded-full text-center">Download MP3</a>
-            <a :href="videoInfo.mp4" target="_blank" class="block w-full px-4 py-2 bg-gray-700 text-white rounded-full text-center">Download MP4</a>
+      <div v-if="videoInfo" class="mt-10 w-full max-w-2xl bg-gray-800 p-6 rounded-lg">
+        <div class="flex items-center space-x-4">
+          <img :src="videoInfo.image" alt="Thumbnail" class="w-32 rounded">
+          <div>
+            <h2 class="text-xl font-bold text-red-500">{{ videoInfo.title }}</h2>
+            <p class="text-sm text-gray-400">By <a :href="videoInfo.channel" target="_blank" class="text-red-500">{{ videoInfo.name }}</a></p>
+            <p class="text-sm text-gray-400">Views: {{ videoInfo.views }} | Duration: {{ videoInfo.duration }}</p>
           </div>
+        </div>
+        <div class="mt-4 flex space-x-4">
+          <a 
+            :href="videoInfo.mp3" 
+            target="_blank" 
+            class="p-2 bg-red-500 text-white rounded w-full text-center"
+          >
+            Download MP3
+          </a>
+          <a 
+            :href="videoInfo.mp4" 
+            target="_blank" 
+            class="p-2 bg-red-500 text-white rounded w-full text-center"
+          >
+            Download MP4
+          </a>
         </div>
       </div>
     </main>
   </div>
 
   <script>
-    const { createApp, ref } = Vue;
-    createApp({
-      setup() {
-        const videoUrl = ref(""); // Menyimpan URL video yang dimasukkan
-        const videoInfo = ref(null); // Menyimpan data video yang didapat
-        const isLoading = ref(false); // Menyimpan status loading
+    const { createApp } = Vue;
 
-        // Fungsi untuk mengambil informasi video
-        const fetchVideoInfo = async () => {
-          if (!videoUrl.value) {
-            alert("Please enter a valid YouTube URL.");
+    createApp({
+      data() {
+        return {
+          url: '',
+          videoInfo: null,
+          loading: false,
+          error: null,
+        };
+      },
+      methods: {
+        async fetchVideoInfo() {
+          if (!this.url.trim()) {
+            this.error = 'Please enter a valid YouTube URL.';
             return;
           }
 
-          isLoading.value = true; // Menandakan bahwa proses loading sedang berjalan
-          videoInfo.value = null; // Reset data video yang sebelumnya
+          this.loading = true;
+          this.error = null;
+          this.videoInfo = null;
 
           try {
-            // Mengambil data dari API yang sudah disediakan
-            const response = await fetch(`/api/youtube?url=${encodeURIComponent(videoUrl.value)}`);
+            const response = await fetch(`/api/youtube?url=${encodeURIComponent(this.url)}`);
             if (!response.ok) {
-              throw new Error("Failed to fetch video info.");
+              throw new Error('Failed to fetch video info. Please check the URL or try again later.');
             }
-            videoInfo.value = await response.json(); // Menyimpan data video yang berhasil diambil
-          } catch (error) {
-            alert("Error fetching video info. Please try again.");
-            console.error(error);
-          } finally {
-            isLoading.value = false; // Menandakan bahwa proses loading telah selesai
-          }
-        };
 
-        return { videoUrl, videoInfo, fetchVideoInfo, isLoading };
-      }
-    }).mount("#app");
+            this.videoInfo = await response.json();
+          } catch (err) {
+            this.error = err.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+      },
+    }).mount('#app');
   </script>
 </body>
 </html>
