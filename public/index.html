@@ -12,6 +12,30 @@
       color: #ffffff;
       font-family: 'Arial', sans-serif;
     }
+    .loading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .toast {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 2s ease-in-out, fadeOut 2s ease-in-out 4s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -34,9 +58,9 @@
       </div>
       <div class="mt-6 w-full max-w-md">
         <input v-model="videoUrl" type="text" placeholder="Input query or paste your YouTube url..." class="w-full p-2 rounded border border-red-500 bg-black text-white placeholder-gray-500">
-        <button @click="fetchVideoData" class="w-full mt-2 p-2 bg-red-500 text-white rounded">Analyze</button>
+        <button @click="fetchVideoData" :disabled="isLoading" :class="{'bg-gray-600': isLoading}" class="w-full mt-2 p-2 bg-red-500 text-white rounded loading">{{ isLoading ? 'Loading...' : 'Analyze' }}</button>
       </div>
-      
+
       <!-- BAGIAN TETAP -->
       <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
         <div class="bg-gray-800 p-6 rounded-lg text-center">
@@ -73,8 +97,14 @@
           <a :href="videoData.mp4" target="_blank" class="block mt-2 p-2 bg-red-500 text-white rounded">Download MP4</a>
         </div>
       </div>
+
+      <!-- Toast for error or success message -->
+      <div v-if="showToast" class="toast">
+        {{ toastMessage }}
+      </div>
     </main>
   </div>
+
   <script>
     const { createApp } = Vue;
 
@@ -83,25 +113,39 @@
         return {
           videoUrl: '', // Input URL dari pengguna
           videoData: null, // Data video dari backend
+          isLoading: false, // Status loading
+          showToast: false, // Untuk menampilkan toast
+          toastMessage: '', // Pesan untuk toast
         };
       },
       methods: {
         async fetchVideoData() {
           if (!this.videoUrl) {
-            alert('Please input a YouTube URL.');
+            this.showToastMessage('Please input a YouTube URL.', 'error');
             return;
           }
 
+          this.isLoading = true; // Mulai loading
           try {
             const response = await fetch(`/api/youtube?url=${encodeURIComponent(this.videoUrl)}`);
             if (!response.ok) {
               throw new Error('Failed to fetch video data.');
             }
             this.videoData = await response.json();
+            this.showToastMessage('Video data fetched successfully!', 'success');
           } catch (error) {
             console.error(error);
-            alert('Error fetching video data. Please try again.');
+            this.showToastMessage('Error fetching video data. Please try again.', 'error');
+          } finally {
+            this.isLoading = false; // Selesai loading
           }
+        },
+        showToastMessage(message, type) {
+          this.toastMessage = message;
+          this.showToast = true;
+          setTimeout(() => {
+            this.showToast = false;
+          }, 4000); // Hide toast after 4 seconds
         },
       },
     }).mount('#app');
