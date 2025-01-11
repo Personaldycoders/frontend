@@ -4,6 +4,9 @@ const axios = require('axios');
 
 const app = express();
 
+// In-memory cache
+const cache = new Map();
+
 const SaveTube = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
@@ -35,7 +38,10 @@ const SaveTube = {
         };
 
         try {
-            const response = await axios.post(url, body, { headers });
+            const response = await axios.post(url, body, {
+                headers,
+                timeout: 5000 // Timeout 5 detik
+            });
             return response.data;
         } catch (error) {
             console.error("Fetch error:", error.message);
@@ -50,55 +56,40 @@ const SaveTube = {
     async dl(link, qualityIndex, type) {
         this.checkQuality(type, qualityIndex);
 
-        let cdnNumber = this.cdn();
-        let cdnUrl = `cdn${cdnNumber}.savetube.su`;
+        let cdnUrl = `cdn${this.cdn()}.savetube.su`;
 
-        // Retry mechanism if the first CDN fails
-        let videoInfo, dlRes;
-        try {
-            videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
+        const fetchVideoInfo = this.fetchData(`https://${cdnUrl}/info`, cdnUrl, { url: link });
+        const fetchDownload = fetchVideoInfo.then((videoInfo) => {
             const downloadBody = {
                 downloadType: type,
                 quality: this.qualities[type][qualityIndex],
                 key: videoInfo.data.key
             };
+            return this.fetchData(this.dLink(cdnUrl), cdnUrl, downloadBody);
+        });
 
-            dlRes = await this.fetchData(this.dLink(cdnUrl), cdnNumber, downloadBody);
-        } catch (error) {
-            // Retry with another CDN if the first one fails
-            cdnNumber = this.cdn();
-            cdnUrl = `cdn${cdnNumber}.savetube.su`;
+        try {
+            const [videoInfo, dlRes] = await Promise.all([fetchVideoInfo, fetchDownload]);
 
-            try {
-                videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
-                const downloadBody = {
-                    downloadType: type,
-                    quality: this.qualities[type][qualityIndex],
-                    key: videoInfo.data.key
-                };
-
-                dlRes = await this.fetchData(this.dLink(cdnUrl), cdnNumber, downloadBody);
-            } catch (retryError) {
-                throw new Error("❌ Gagal mendapatkan URL download setelah mencoba beberapa CDN.");
+            if (!dlRes.data || !dlRes.data.downloadUrl) {
+                throw new Error("❌ Gagal mendapatkan URL download.");
             }
-        }
 
-        if (!dlRes.data || !dlRes.data.downloadUrl) {
-            throw new Error("❌ Gagal mendapatkan URL download.");
+            return {
+                link: dlRes.data.downloadUrl,
+                thumbnail: videoInfo.data.thumbnail,
+                duration: videoInfo.data.duration,
+                durationLabel: videoInfo.data.durationLabel,
+                title: videoInfo.data.title,
+                quality: this.qualities[type][qualityIndex]
+            };
+        } catch (error) {
+            throw new Error("❌ Gagal mengambil data dari server atau URL download.");
         }
-
-        return {
-            link: dlRes.data.downloadUrl,
-            thumbnail: videoInfo.data.thumbnail,  // Menambahkan thumbnail
-            duration: videoInfo.data.duration,
-            durationLabel: videoInfo.data.durationLabel,
-            title: videoInfo.data.title,
-            quality: this.qualities[type][qualityIndex]
-        };
     }
 };
 
-// API route untuk mengambil data video
+// API untuk mendapatkan video
 app.get('/api/youtube', async (req, res) => {
     const { url } = req.query;
 
@@ -106,28 +97,34 @@ app.get('/api/youtube', async (req, res) => {
         return res.status(400).json({ error: 'Tidak ada URL yang diberikan' });
     }
 
-    try {
-        // Mengambil data MP4
-        const videoData = await SaveTube.dl(url, 5, 'video');  // MP4, kualitas 720p (5)
-        
-        // Mengambil data MP3
-        const audioData = await SaveTube.dl(url, 3, 'audio');  // MP3, kualitas 128kbps (3)
+    // Cek cache terlebih dahulu
+    if (cache.has(url)) {
+        return res.json(cache.get(url));
+    }
 
-        // Mengirim kembali response dengan link MP4 dan MP3, dan thumbnail
-        res.json({
-            video: videoData.link,    // Link download MP4
-            audio: audioData.link,    // Link download MP3
-            title: videoData.title,   // Judul video
-            thumbnail: videoData.thumbnail,  // Thumbnail video
-            duration: videoData.durationLabel, // Durasi video
-            description: 'Deskripsi video' // Deskripsi video
-        });
+    try {
+        const videoData = await SaveTube.dl(url, 5, 'video'); // Video 720p
+        const audioData = await SaveTube.dl(url, 3, 'audio'); // Audio 128kbps
+
+        const result = {
+            video: videoData.link,
+            audio: audioData.link,
+            title: videoData.title,
+            thumbnail: videoData.thumbnail,
+            duration: videoData.durationLabel,
+            description: 'Deskripsi video'
+        };
+
+        // Simpan ke cache
+        cache.set(url, result);
+
+        res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Menyajikan file HTML statis
+// Menyajikan file statis (misalnya halaman HTML)
 app.use(express.static(path.join(__dirname, '../public')));
 
 module.exports = app;
