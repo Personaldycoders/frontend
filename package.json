@@ -1,20 +1,15 @@
 {
-  "name": "xytl",
+  "name": "my-youtube-downloader",
   "version": "1.0.0",
-  "description": "YouTube Downloader with MP3/MP4 options",
-  "main": "api/server.js",
+  "main": "/api/server.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "axios": "^0.21.1"
+  },
   "scripts": {
     "start": "node api/server.js"
   },
-  "dependencies": {
-    "express": "^4.18.2",
-    "axios": "^1.5.0"
-  },
-  "devDependencies": {},
   "engines": {
-    "node": ">=14"
-  },
-  "keywords": ["youtube", "downloader", "mp3", "mp4"],
-  "author": "Your Name",
-  "license": "MIT"
+    "node": "16.x"
+  }
 }

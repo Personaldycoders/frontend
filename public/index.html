@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XYTDL</title>
+  <title>DY YTDL - Better YouTube Downloader</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://registry.npmmirror.com/vue/3.3.11/files/dist/vue.global.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -11,99 +12,94 @@
       background-color: #1a1a1a;
       color: #ffffff;
       font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    .loading {
-      pointer-events: none;
-      opacity: 0.6;
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    .toast {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      background-color: #333;
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 14px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      animation: fadeIn 2s ease-in-out, fadeOut 2s ease-in-out 4s;
+
+    main {
+      margin-top: 100px; 
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
+
+    .scrollable-content {
+      max-height: calc(100vh - 80px); 
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <div id="app" class="min-h-screen flex flex-col items-center justify-center">
+  <div id="app" class="flex flex-col items-center justify-start pt-1">
     <header class="w-full flex justify-between items-center p-4 bg-black">
       <div class="flex items-center space-x-2">
         <i class="fas fa-download text-red-500"></i>
-        <span class="text-xl text-red-500 font-bold">XYTDL</span>
+        <span class="text-xl font-bold text-red-500">DYTDL</span>
       </div>
-      <div class="flex space-x-4">
-        <a href="#" class="text-red-500">API</a>
-        <a href="#" class="text-red-500">Contact</a>
-      </div>
+<nav class="flex space-x-4">
+  <a href="https://github.com/Personaldycoders" target="_blank" class="text-red-500">
+    <i class="fab fa-github text-2xl"></i>
+  </a>
+  <a href="https://dycoders.xyz" class="text-red-500">
+    <i class="fas fa-globe text-2xl"></i>
+  </a>
+  <a href="https://whatsapp.com/channel/0029VagpRL811ulLEm4TnO0h" class="text-red-500">
+    <i class="fas fa-phone-alt text-2xl"></i>
+  </a>
+</nav>
+
     </header>
-    <main class="flex flex-col items-center mt-10 px-4">
+    <main class="flex flex-col items-center mt-10">
       <div class="text-center">
-        <i class="fas fa-download text-4xl text-red-500"></i>
-        <h1 class="text-4xl text-red-500 font-bold mt-2">XYTDL</h1>
+        <i class="fas fa-download text-5xl text-red-500"></i>
+        <h1 class="text-4xl font-bold text-red-500 mt-2">DYTDL</h1>
         <p class="text-lg text-gray-400">Better YouTube Downloader</p>
       </div>
       <div class="mt-6 w-full max-w-md">
         <input v-model="videoUrl" type="text" placeholder="Input query or paste your YouTube url..." class="w-full p-2 rounded border border-red-500 bg-black text-white placeholder-gray-500">
-        <button @click="fetchVideoData" :disabled="isLoading" :class="{'bg-gray-600': isLoading}" class="w-full mt-2 p-2 bg-red-500 text-white rounded loading">{{ isLoading ? 'Loading...' : 'Analyze' }}</button>
+        <button @click="fetchVideoData" :disabled="isLoading" :class="{'bg-gray-600': isLoading}" class="w-full mt-2 p-2 bg-red-500 text-white rounded">{{ isLoading ? 'Loading...' : 'Analyze' }}</button>
       </div>
 
-      <!-- BAGIAN TETAP -->
-      <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-        <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <i class="fas fa-info-circle text-2xl text-red-500"></i>
-          <h2 class="text-xl text-red-500 font-bold mt-2">About XYTDL</h2>
-          <p class="text-gray-400 mt-2">XYTDL is a fast and easy service for downloading YouTube videos and audio. Ad-free and 100% free.</p>
-        </div>
-        <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <i class="fas fa-star text-2xl text-red-500"></i>
-          <h2 class="text-xl text-red-500 font-bold mt-2">Main Features</h2>
-          <p class="text-gray-400 mt-2"><i class="fas fa-video text-red-500"></i> High-quality video downloads (1080p, 4K).</p>
-          <p class="text-gray-400 mt-2"><i class="fas fa-music text-red-500"></i> High-quality MP3 audio formats.</p>
-          <p class="text-gray-400 mt-2"><i class="fas fa-bolt text-red-500"></i> Fast process and no limits.</p>
-        </div>
-        <div class="bg-gray-800 p-6 rounded-lg text-center md:col-span-2">
-          <i class="fas fa-cogs text-2xl text-red-500"></i>
-          <h2 class="text-xl text-red-500 font-bold mt-2">How It Works</h2>
-          <p class="text-gray-400 mt-2">Simply enter the YouTube video URL, click "Analyze", then choose your desired video or audio format to download.</p>
-        </div>
-      </div>
-
-      <!-- BAGIAN HASIL BACKEND -->
       <div v-if="videoData" class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
         <div class="bg-gray-800 p-6 rounded-lg text-center">
           <img :src="videoData.thumbnail" alt="Thumbnail" class="rounded mb-4">
-          <h2 class="text-xl text-red-500 font-bold">{{ videoData.title }}</h2>
+          <h2 class="text-xl font-bold text-red-500">{{ videoData.title }}</h2>
           <p class="text-gray-400 mt-2">{{ videoData.description }}</p>
           <p class="text-gray-400 mt-2">Views: {{ videoData.views }}</p>
           <p class="text-gray-400 mt-2">Duration: {{ videoData.duration }}</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <h2 class="text-xl text-red-500 font-bold mt-2">Download Options</h2>
-          <a :href="videoData.mp3" target="_blank" class="block mt-2 p-2 bg-red-500 text-white rounded">Download MP3</a>
-          <a :href="videoData.mp4" target="_blank" class="block mt-2 p-2 bg-red-500 text-white rounded">Download MP4</a>
+          <h2 class="text-xl font-bold text-red-500 mt-2">Download Options</h2>
+          <a :href="videoData.audio" target="_blank" class="block mt-2 p-2 bg-red-500 text-white rounded">Download MP3</a>
+          <a :href="videoData.video" target="_blank" class="block mt-2 p-2 bg-red-500 text-white rounded">Download MP4</a>
         </div>
-      </div>
-
-      <!-- Toast for error or success message -->
-      <div v-if="showToast" class="toast">
-        {{ toastMessage }}
       </div>
     </main>
   </div>
+<div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+  <div class="bg-gray-800 p-6 rounded-lg text-center">
+    <i class="fas fa-info-circle text-3xl text-red-500"></i>
+    <h2 class="text-xl font-bold text-red-500 mt-2">About DYTDL</h2>
+    <p class="text-gray-400 mt-2">DYTDL is a fast and easy service for downloading YouTube videos and audio. Ad-free and 100% free.</p>
+  </div>
+  <div class="bg-gray-800 p-6 rounded-lg text-center">
+    <i class="fas fa-star text-3xl text-red-500"></i>
+    <h2 class="text-xl font-bold text-red-500 mt-2">Main Features</h2>
+    <p class="text-gray-400 mt-2">
+      <i class="fas fa-video text-red-500"></i> High-quality video downloads 720p.<br>
+      <i class="fas fa-music text-red-500"></i> High-quality MP3 audio formats.<br>
+      <i class="fas fa-bolt text-red-500"></i> Fast process and no limits.
+    </p>
+  </div>
+  <div class="bg-gray-800 p-6 rounded-lg text-center md:col-span-2">
+    <i class="fas fa-cogs text-3xl text-red-500"></i>
+    <h2 class="text-xl font-bold text-red-500 mt-2">How It Works</h2>
+    <p class="text-gray-400 mt-2">Simply enter the YouTube video URL, click "Analyze", then choose your desired video or audio format to download.</p>
+  </div>
+</div>
 
   <script>
     const { createApp } = Vue;
@@ -111,41 +107,37 @@
     createApp({
       data() {
         return {
-          videoUrl: '', // Input URL dari pengguna
-          videoData: null, // Data video dari backend
-          isLoading: false, // Status loading
-          showToast: false, // Untuk menampilkan toast
-          toastMessage: '', // Pesan untuk toast
+          videoUrl: '',
+          videoData: null,
+          isLoading: false,
         };
       },
       methods: {
         async fetchVideoData() {
           if (!this.videoUrl) {
-            this.showToastMessage('Please input a YouTube URL.', 'error');
+            alert("Please input a YouTube URL.");
             return;
           }
 
-          this.isLoading = true; // Mulai loading
+          this.isLoading = true;
           try {
             const response = await fetch(`/api/youtube?url=${encodeURIComponent(this.videoUrl)}`);
             if (!response.ok) {
               throw new Error('Failed to fetch video data.');
             }
             this.videoData = await response.json();
-            this.showToastMessage('Video data fetched successfully!', 'success');
+            this.scrollToResults();
           } catch (error) {
             console.error(error);
-            this.showToastMessage('Error fetching video data. Please try again.', 'error');
+            alert('Error fetching video data. Please try again.');
           } finally {
-            this.isLoading = false; // Selesai loading
+            this.isLoading = false;
           }
         },
-        showToastMessage(message, type) {
-          this.toastMessage = message;
-          this.showToast = true;
-          setTimeout(() => {
-            this.showToast = false;
-          }, 4000); // Hide toast after 4 seconds
+
+        scrollToResults() {
+          const resultsSection = document.querySelector('main');
+          resultsSection.scrollIntoView({ behavior: 'smooth' });
         },
       },
     }).mount('#app');
