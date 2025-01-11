@@ -40,7 +40,7 @@ const SaveTube = {
         try {
             const response = await axios.post(url, body, {
                 headers,
-                timeout: 5000 // Timeout 5 detik
+                timeout: 11000 // Timeout 5 detik
             });
             return response.data;
         } catch (error) {
