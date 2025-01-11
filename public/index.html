@@ -123,13 +123,13 @@
           try {
             const response = await fetch(`/api/youtube?url=${encodeURIComponent(this.videoUrl)}`);
             if (!response.ok) {
-              throw new Error('Failed to fetch video data.');
+              throw new Error('Maaf gagal silahkan refesh web');
             }
             this.videoData = await response.json();
             this.scrollToResults();
           } catch (error) {
             console.error(error);
-            alert('Error fetching video data. Please try again.');
+            alert('Maaf gagal silahkan refesh web');
           } finally {
             this.isLoading = false;
           }
