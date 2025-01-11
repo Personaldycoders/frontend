@@ -18,7 +18,8 @@ const SaveTube = {
         'referer': 'https://ytshorts.savetube.me/',
         'origin': 'https://ytshorts.savetube.me/',
         'user-agent': 'Postify/1.0.0',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        timeout: 10000 
     },
 
     cdn() {
