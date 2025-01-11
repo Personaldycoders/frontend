@@ -40,7 +40,7 @@ const SaveTube = {
         try {
             const response = await axios.post(url, body, {
                 headers,
-                timeout: 11000 // Timeout 5 detik
+                timeout: 11000 // Timeout 11 detik untuk memastikan sesuai dengan Vercel limit
             });
             return response.data;
         } catch (error) {
@@ -58,18 +58,14 @@ const SaveTube = {
 
         let cdnUrl = `cdn${this.cdn()}.savetube.su`;
 
-        const fetchVideoInfo = this.fetchData(`https://${cdnUrl}/info`, cdnUrl, { url: link });
-        const fetchDownload = fetchVideoInfo.then((videoInfo) => {
+        try {
+            const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnUrl, { url: link });
             const downloadBody = {
                 downloadType: type,
                 quality: this.qualities[type][qualityIndex],
                 key: videoInfo.data.key
             };
-            return this.fetchData(this.dLink(cdnUrl), cdnUrl, downloadBody);
-        });
-
-        try {
-            const [videoInfo, dlRes] = await Promise.all([fetchVideoInfo, fetchDownload]);
+            const dlRes = await this.fetchData(this.dLink(cdnUrl), cdnUrl, downloadBody);
 
             if (!dlRes.data || !dlRes.data.downloadUrl) {
                 throw new Error("❌ Gagal mendapatkan URL download.");
@@ -89,9 +85,9 @@ const SaveTube = {
     }
 };
 
-// API untuk mendapatkan video
+// API untuk mendapatkan video/audio
 app.get('/api/youtube', async (req, res) => {
-    const { url } = req.query;
+    const { url, type } = req.query; // type: 'video' atau 'audio'
 
     if (!url) {
         return res.status(400).json({ error: 'Tidak ada URL yang diberikan' });
@@ -103,17 +99,27 @@ app.get('/api/youtube', async (req, res) => {
     }
 
     try {
-        const videoData = await SaveTube.dl(url, 5, 'video'); // Video 720p
-        const audioData = await SaveTube.dl(url, 3, 'audio'); // Audio 128kbps
+        let result;
 
-        const result = {
-            video: videoData.link,
-            audio: audioData.link,
-            title: videoData.title,
-            thumbnail: videoData.thumbnail,
-            duration: videoData.durationLabel,
-            description: 'Deskripsi video'
-        };
+        if (type === 'video') {
+            const videoData = await SaveTube.dl(url, 5, 'video'); // Video 720p
+            result = {
+                video: videoData.link,
+                title: videoData.title,
+                thumbnail: videoData.thumbnail,
+                duration: videoData.durationLabel
+            };
+        } else if (type === 'audio') {
+            const audioData = await SaveTube.dl(url, 3, 'audio'); // Audio 128kbps
+            result = {
+                audio: audioData.link,
+                title: audioData.title,
+                thumbnail: audioData.thumbnail,
+                duration: audioData.durationLabel
+            };
+        } else {
+            throw new Error('Tipe harus berupa video atau audio');
+        }
 
         // Simpan ke cache
         cache.set(url, result);
@@ -126,5 +132,10 @@ app.get('/api/youtube', async (req, res) => {
 
 // Menyajikan file statis (misalnya halaman HTML)
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Default route untuk root
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 module.exports = app;
